@@ -7,9 +7,16 @@ export function useAuth() {
   const { data: user, isLoading } = useQuery<AuthUser | null>({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const res = await fetch("/api/user", { credentials: "include" });
-      if (res.status === 401) return null;
-      return res.json();
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch("/api/user", { credentials: "include", signal: controller.signal });
+        clearTimeout(timeout);
+        if (res.status === 401) return null;
+        return res.json();
+      } catch {
+        return null;
+      }
     },
   });
 

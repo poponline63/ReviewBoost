@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Star, BarChart3, MessageSquare, QrCode } from "lucide-react";
 
-export default function AuthPage() {
+export default function AuthPage({ onBack }: { onBack?: () => void }) {
   const { loginMutation, registerMutation } = useAuth();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [form, setForm] = useState({ username: "", password: "", email: "" });
