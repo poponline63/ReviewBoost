@@ -1,0 +1,3262 @@
+import React, { useState } from 'react';
+import { Mail, Star, Send, Settings, Users, BarChart3, Upload, Search, Trash2, CheckCircle, Clock, Download, Sparkles, Copy, RefreshCw, ThumbsUp, ThumbsDown, MessageSquare, TrendingUp, AlertCircle, Smile, Frown, Meh, Zap, Bell, BellOff, RefreshCcw, Eye, EyeOff, FileText, Plus, Edit2, Trash, QrCode, Printer, Share2 } from 'lucide-react';
+
+export default function ReviewBoostPlatform() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sentimentTab, setSentimentTab] = useState('overview');
+  const [businessName, setBusinessName] = useState('My Business');
+  const [placeId, setPlaceId] = useState('');
+  const [yelpUrl, setYelpUrl] = useState('');
+  const [facebookUrl, setFacebookUrl] = useState('');
+  const [trustpilotUrl, setTrustpilotUrl] = useState('');
+  const [tripadvisorUrl, setTripadvisorUrl] = useState('');
+  const [selectedPlatforms, setSelectedPlatforms] = useState(['google']);
+  const [deliveryMethod, setDeliveryMethod] = useState('email');
+  const [smsMessage, setSmsMessage] = useState('Hi {name}! Thanks for choosing {business}. We\'d love your feedback! Leave us a review: {link}');
+  const [emailSubject, setEmailSubject] = useState('We\'d love your feedback!');
+  const [scheduleTiming, setScheduleTiming] = useState('immediate');
+  const [notifications, setNotifications] = useState([
+    { id: 1, type: 'negative_review', platform: 'Google', customerName: 'David Thompson', rating: 2, time: '2 minutes ago', read: false },
+    { id: 2, type: 'new_review', platform: 'Yelp', customerName: 'Chris Anderson', rating: 4, time: '1 hour ago', read: false },
+    { id: 3, type: 'positive_review', platform: 'Facebook', customerName: 'Amanda Lee', rating: 5, time: '3 hours ago', read: true }
+  ]);
+  const [autoSync, setAutoSync] = useState(true);
+  const [syncFrequency, setSyncFrequency] = useState('15min');
+  const [alertSettings, setAlertSettings] = useState({
+    negativeReviews: true,
+    allReviews: false,
+    emailAlerts: true,
+    smsAlerts: false,
+    pushNotifications: true
+  });
+  const [lastSyncTime, setLastSyncTime] = useState(new Date());
+  const [templates, setTemplates] = useState([
+    {
+      id: 1,
+      name: 'Professional Service Follow-up',
+      category: 'Professional Services',
+      emailSubject: 'How was your experience with {business}?',
+      emailBody: 'Hi {name},\n\nThank you for choosing {business}. We hope you had a great experience with our team.\n\nWould you mind taking a moment to share your feedback? Your review helps us improve and helps others find us.\n\n{link}\n\nThank you for your time!\n\nBest regards,\n{business} Team',
+      smsBody: 'Hi {name}! Thanks for choosing {business}. We\'d love your feedback! {link}',
+      performance: { sent: 245, opened: 189, reviewed: 73, rating: 4.2 },
+      isDefault: false,
+      createdAt: '2025-10-01'
+    },
+    {
+      id: 2,
+      name: 'Restaurant Thank You',
+      category: 'Restaurant',
+      emailSubject: 'Thanks for dining with us!',
+      emailBody: 'Hi {name},\n\nThank you for dining at {business}! We hope you enjoyed your meal.\n\nIf you had a great experience, we\'d be grateful if you could share it with others. Your review helps food lovers discover us!\n\n{link}\n\nWe look forward to serving you again soon!\n\nWarm regards,\n{business}',
+      smsBody: 'Thanks for dining at {business}, {name}! Loved your meal? Share your experience: {link}',
+      performance: { sent: 512, opened: 476, reviewed: 201, rating: 4.5 },
+      isDefault: true,
+      createdAt: '2025-09-15'
+    },
+    {
+      id: 3,
+      name: 'E-commerce Order Delivered',
+      category: 'E-commerce',
+      emailSubject: 'How do you like your order from {business}?',
+      emailBody: 'Hi {name},\n\nYour order has been delivered! We hope you\'re loving your purchase from {business}.\n\nWould you take 30 seconds to let us know how we did? Your feedback helps us serve you better and helps other shoppers make confident decisions.\n\n{link}\n\nThank you for shopping with us!\n\n{business}',
+      smsBody: 'Hi {name}! Got your order from {business}? Love it? Leave us a quick review: {link}',
+      performance: { sent: 892, opened: 758, reviewed: 312, rating: 4.3 },
+      isDefault: false,
+      createdAt: '2025-09-20'
+    },
+    {
+      id: 4,
+      name: 'Auto Repair Follow-up',
+      category: 'Automotive',
+      emailSubject: 'How\'s your vehicle running?',
+      emailBody: 'Hi {name},\n\nThank you for trusting {business} with your vehicle repair. We hope everything is running smoothly!\n\nIf you were satisfied with our service, would you mind sharing your experience? It helps other drivers find reliable service.\n\n{link}\n\nDrive safe!\n\n{business} Team',
+      smsBody: 'Hi {name}! How\'s your car running after the repair at {business}? Share your experience: {link}',
+      performance: { sent: 178, opened: 145, reviewed: 68, rating: 4.6 },
+      isDefault: false,
+      createdAt: '2025-10-05'
+    },
+    {
+      id: 5,
+      name: 'Friendly & Casual',
+      category: 'General',
+      emailSubject: 'Quick favor? 😊',
+      emailBody: 'Hey {name}!\n\nThanks for being awesome and choosing {business}! We really appreciate you.\n\nIf you have a sec, we\'d love to hear what you think. Your feedback means the world to us and helps others discover what we do.\n\n{link}\n\nThanks a million!\n\nCheers,\n{business}',
+      smsBody: 'Hey {name}! 😊 Thanks for choosing {business}! Mind leaving us a quick review? {link}',
+      performance: { sent: 423, opened: 391, reviewed: 182, rating: 4.4 },
+      isDefault: false,
+      createdAt: '2025-10-10'
+    },
+    {
+      id: 6,
+      name: 'Medical/Healthcare Visit',
+      category: 'Healthcare',
+      emailSubject: 'We hope you\'re feeling better',
+      emailBody: 'Dear {name},\n\nThank you for visiting {business}. We hope your experience with our team was positive and that you\'re feeling better.\n\nIf you\'re comfortable sharing, we\'d appreciate your feedback about your visit. Your input helps us continue providing quality care.\n\n{link}\n\nWishing you good health,\n{business}',
+      smsBody: 'Hi {name}, thanks for visiting {business}. Mind sharing your experience? {link}',
+      performance: { sent: 156, opened: 132, reviewed: 51, rating: 4.7 },
+      isDefault: false,
+      createdAt: '2025-09-28'
+    }
+  ]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({
+    name: '',
+    category: 'General',
+    emailSubject: '',
+    emailBody: '',
+    smsBody: ''
+  });
+  const [qrCodes, setQrCodes] = useState([
+    { id: 1, name: 'Main Location QR', platform: 'Google', style: 'standard', size: 'medium', scans: 145, reviews: 42, createdAt: '2025-10-01' },
+    { id: 2, name: 'Table Tent QR', platform: 'Yelp', style: 'rounded', size: 'large', scans: 89, reviews: 31, createdAt: '2025-10-05' },
+    { id: 3, name: 'Receipt QR Code', platform: 'Facebook', style: 'dots', size: 'small', scans: 203, reviews: 67, createdAt: '2025-10-08' }
+  ]);
+  const [isCreatingQR, setIsCreatingQR] = useState(false);
+  const [newQR, setNewQR] = useState({
+    name: '',
+    platform: 'Google',
+    style: 'standard',
+    size: 'medium',
+    includeText: true,
+    customText: 'Scan to Review Us!'
+  });
+  const [widgets, setWidgets] = useState([
+    { 
+      id: 1, 
+      name: 'Homepage Carousel', 
+      type: 'carousel', 
+      theme: 'light', 
+      minRating: 4, 
+      maxReviews: 5, 
+      showPlatform: true,
+      autoPlay: true,
+      createdAt: '2025-10-01',
+      installs: 1,
+      views: 1247,
+      clicks: 89
+    },
+    { 
+      id: 2, 
+      name: 'Footer Badge', 
+      type: 'badge', 
+      theme: 'dark', 
+      minRating: 4, 
+      maxReviews: 0, 
+      showPlatform: false,
+      autoPlay: false,
+      createdAt: '2025-10-05',
+      installs: 1,
+      views: 2891,
+      clicks: 156
+    }
+  ]);
+  const [isCreatingWidget, setIsCreatingWidget] = useState(false);
+  const [newWidget, setNewWidget] = useState({
+    name: '',
+    type: 'carousel',
+    theme: 'light',
+    minRating: 4,
+    maxReviews: 5,
+    showPlatform: true,
+    autoPlay: true,
+    showDates: true,
+    animation: 'slide'
+  });
+  const [showWidgetCode, setShowWidgetCode] = useState(null);
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
+  const [showBulkSuccess, setShowBulkSuccess] = useState(false);
+  const [businessDescription, setBusinessDescription] = useState('We are a family-owned business dedicated to providing excellent service to our customers.');
+  const [responseStyle, setResponseStyle] = useState('professional');
+  
+  const [customers, setCustomers] = useState([
+    { id: 1, name: 'Sarah Johnson', email: 'sarah.j@email.com', phone: '(555) 123-4567', addedDate: '2025-10-10', status: 'active' },
+    { id: 2, name: 'Michael Chen', email: 'mchen@email.com', phone: '(555) 234-5678', addedDate: '2025-10-12', status: 'active' },
+    { id: 3, name: 'Emily Rodriguez', email: 'emily.r@email.com', phone: '(555) 345-6789', addedDate: '2025-10-13', status: 'active' },
+    { id: 4, name: 'James Williams', email: 'jwilliams@email.com', phone: '(555) 456-7890', addedDate: '2025-10-14', status: 'active' },
+    { id: 5, name: 'Lisa Anderson', email: 'landerson@email.com', phone: '(555) 567-8901', addedDate: '2025-10-14', status: 'active' },
+  ]);
+  
+  const [sentRequests, setSentRequests] = useState([
+    { id: 1001, name: 'John Smith', email: 'john@email.com', phone: '(555) 123-4567', sentAt: '2025-10-14 10:30 AM', status: 'Reviewed', reviewLink: true, method: 'SMS' },
+    { id: 1002, name: 'Mary Davis', email: 'mary@email.com', phone: '(555) 234-5678', sentAt: '2025-10-14 11:45 AM', status: 'Opened', reviewLink: false, method: 'Email' },
+    { id: 1003, name: 'Robert Brown', email: 'robert@email.com', phone: '(555) 345-6789', sentAt: '2025-10-13 3:20 PM', status: 'Sent', reviewLink: false, method: 'SMS' },
+  ]);
+
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      customerName: 'Jessica Martinez',
+      rating: 5,
+      text: 'Absolutely amazing service! The team went above and beyond to help me. I was impressed by their attention to detail and professionalism. Will definitely be back!',
+      date: '2025-10-15',
+      platform: 'Google',
+      sentiment: 'positive',
+      response: null,
+      responded: false,
+      keywords: ['amazing', 'professional', 'attention to detail'],
+      emotions: ['joy', 'satisfaction']
+    },
+    {
+      id: 2,
+      customerName: 'David Thompson',
+      rating: 2,
+      text: 'Disappointed with the service. Had to wait over 30 minutes and the staff seemed overwhelmed. The quality wasn\'t what I expected based on the reviews.',
+      date: '2025-10-14',
+      platform: 'Yelp',
+      sentiment: 'negative',
+      response: null,
+      responded: false,
+      keywords: ['disappointed', 'wait', 'overwhelmed'],
+      emotions: ['frustration', 'disappointment']
+    },
+    {
+      id: 3,
+      customerName: 'Amanda Lee',
+      rating: 4,
+      text: 'Good experience overall. The service was solid and the team was friendly. Only minor issue was the wait time, but everything else was great.',
+      date: '2025-10-13',
+      platform: 'Facebook',
+      sentiment: 'positive',
+      response: null,
+      responded: false,
+      keywords: ['good', 'friendly', 'solid'],
+      emotions: ['satisfaction']
+    },
+    {
+      id: 4,
+      customerName: 'Robert Kim',
+      rating: 1,
+      text: 'Terrible experience. The product didn\'t work as advertised and customer service was unhelpful. Would not recommend.',
+      date: '2025-10-12',
+      platform: 'Google',
+      sentiment: 'negative',
+      response: null,
+      responded: false,
+      keywords: ['terrible', 'unhelpful', 'not recommend'],
+      emotions: ['anger', 'frustration']
+    },
+    {
+      id: 5,
+      customerName: 'Michelle Chang',
+      rating: 5,
+      text: 'Best experience I\'ve had! Everything was perfect from start to finish. The staff was knowledgeable and friendly. Highly recommend!',
+      date: '2025-10-11',
+      platform: 'Trustpilot',
+      sentiment: 'positive',
+      response: null,
+      responded: false,
+      keywords: ['best', 'perfect', 'knowledgeable'],
+      emotions: ['joy', 'satisfaction']
+    },
+    {
+      id: 6,
+      customerName: 'Tom Wilson',
+      rating: 3,
+      text: 'Average experience. Nothing special but nothing terrible either. Got what I needed.',
+      date: '2025-10-10',
+      platform: 'Yelp',
+      sentiment: 'neutral',
+      response: null,
+      responded: false,
+      keywords: ['average', 'nothing special'],
+      emotions: ['neutral']
+    },
+    {
+      id: 7,
+      customerName: 'Sarah Parker',
+      rating: 5,
+      text: 'Outstanding service! The team made me feel valued and took care of everything perfectly. I\'m so glad I chose this business.',
+      date: '2025-10-09',
+      platform: 'TripAdvisor',
+      sentiment: 'positive',
+      response: null,
+      responded: false,
+      keywords: ['outstanding', 'valued', 'perfectly'],
+      emotions: ['joy', 'gratitude']
+    },
+    {
+      id: 8,
+      customerName: 'Mike Davis',
+      rating: 2,
+      text: 'Not impressed. The service was slow and the final result was mediocre. Expected better quality.',
+      date: '2025-10-08',
+      platform: 'Facebook',
+      sentiment: 'negative',
+      response: null,
+      responded: false,
+      keywords: ['slow', 'mediocre', 'not impressed'],
+      emotions: ['disappointment']
+    },
+    {
+      id: 9,
+      customerName: 'Emily Johnson',
+      rating: 5,
+      text: 'Exceptional quality and service! Will definitely return and recommend to friends and family.',
+      date: '2025-10-07',
+      platform: 'Google',
+      sentiment: 'positive',
+      response: null,
+      responded: false,
+      keywords: ['exceptional', 'quality', 'recommend'],
+      emotions: ['joy', 'satisfaction']
+    },
+    {
+      id: 10,
+      customerName: 'Chris Anderson',
+      rating: 4,
+      text: 'Very satisfied with my experience. The team was helpful and the results exceeded my expectations.',
+      date: '2025-10-06',
+      platform: 'Yelp',
+      sentiment: 'positive',
+      response: null,
+      responded: false,
+      keywords: ['satisfied', 'helpful', 'exceeded expectations'],
+      emotions: ['satisfaction', 'joy']
+    }
+  ]);
+
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [generatedResponse, setGeneratedResponse] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateAIResponse = (review) => {
+    setIsGenerating(true);
+    setSelectedReview(review);
+    
+    setTimeout(() => {
+      let response = '';
+      
+      if (review.rating >= 4) {
+        const positiveResponses = [
+          `Hi ${review.customerName}! Thank you so much for your wonderful review! We're thrilled to hear that you had such a great experience with ${businessName}. Your feedback about our team's dedication truly means the world to us. We look forward to serving you again soon!`,
+          `Dear ${review.customerName}, we're so grateful for your kind words! It's customers like you that make what we do at ${businessName} so rewarding. We're delighted that we could exceed your expectations, and we can't wait to see you again!`,
+          `${review.customerName}, thank you for taking the time to share your positive experience! We're honored that you chose ${businessName} and we're so happy we could provide the level of service you deserve. Looking forward to your next visit!`
+        ];
+        response = positiveResponses[Math.floor(Math.random() * positiveResponses.length)];
+      } else if (review.rating === 3) {
+        const neutralResponses = [
+          `Hi ${review.customerName}, thank you for your honest feedback. We're glad you had a generally positive experience at ${businessName}. We've taken note of your comments about the wait time and are working on improvements. We'd love the opportunity to provide you with an even better experience next time!`,
+          `Dear ${review.customerName}, we appreciate you sharing your thoughts with us. We're happy that several aspects of your visit went well, and we're committed to addressing the areas where we fell short. Please reach out to us directly so we can make things right!`
+        ];
+        response = neutralResponses[Math.floor(Math.random() * neutralResponses.length)];
+      } else {
+        const negativeResponses = [
+          `Hi ${review.customerName}, we sincerely apologize that your experience at ${businessName} didn't meet expectations. This is not the level of service we strive for, and we take your feedback very seriously. We'd like to make this right - please contact us directly at [contact info] so we can address your concerns personally. Thank you for bringing this to our attention.`,
+          `Dear ${review.customerName}, we're truly sorry to hear about your disappointing experience. Your feedback is invaluable and helps us improve. We'd appreciate the opportunity to speak with you directly to understand what happened and make things right. Please reach out to us at [contact info]. We want to earn back your trust.`,
+          `${review.customerName}, we apologize for falling short of your expectations. This isn't reflective of the quality service we aim to provide at ${businessName}. We'd like to discuss this with you further and find a resolution. Please contact us at [contact info] at your earliest convenience.`
+        ];
+        response = negativeResponses[Math.floor(Math.random() * negativeResponses.length)];
+      }
+      
+      if (responseStyle === 'friendly') {
+        response = response.replace('Dear', 'Hey').replace('Hi', 'Hey');
+      } else if (responseStyle === 'formal') {
+        response = response.replace('Hey', 'Dear').replace('Hi', 'Dear');
+      }
+      
+      setGeneratedResponse(response);
+      setIsGenerating(false);
+    }, 1500);
+  };
+
+  const applyResponseToReview = () => {
+    setReviews(reviews.map(r => 
+      r.id === selectedReview.id 
+        ? { ...r, response: generatedResponse, responded: true }
+        : r
+    ));
+    setSelectedReview(null);
+    setGeneratedResponse('');
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert('Response copied to clipboard!');
+  };
+
+  const generateReviewLink = () => {
+    if (!placeId) return '#';
+    return `https://search.google.com/local/writereview?placeid=${placeId}`;
+  };
+
+  const handleAddCustomer = () => {
+    if (!customerEmail || !customerName) {
+      alert('Please fill in at least name and email');
+      return;
+    }
+
+    const newCustomer = {
+      id: Date.now(),
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      addedDate: new Date().toISOString().split('T')[0],
+      status: 'active'
+    };
+
+    setCustomers([newCustomer, ...customers]);
+    setCustomerEmail('');
+    setCustomerName('');
+    setCustomerPhone('');
+    alert('Customer added successfully!');
+  };
+
+  const handleDeleteCustomer = (id) => {
+    if (confirm('Are you sure you want to delete this customer?')) {
+      setCustomers(customers.filter(c => c.id !== id));
+    }
+  };
+
+  const handleSelectCustomer = (id) => {
+    if (selectedCustomers.includes(id)) {
+      setSelectedCustomers(selectedCustomers.filter(cid => cid !== id));
+    } else {
+      setSelectedCustomers([...selectedCustomers, id]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const filtered = getFilteredCustomers();
+    if (selectedCustomers.length === filtered.length) {
+      setSelectedCustomers([]);
+    } else {
+      setSelectedCustomers(filtered.map(c => c.id));
+    }
+  };
+
+  const handleBulkSendRequests = () => {
+    if (selectedCustomers.length === 0) {
+      alert('Please select at least one customer');
+      return;
+    }
+    
+    if (!placeId) {
+      alert('Please configure your Google Place ID in Settings first');
+      return;
+    }
+
+    if (deliveryMethod === 'sms' && selectedCustomers.some(id => {
+      const customer = customers.find(c => c.id === id);
+      return !customer.phone;
+    })) {
+      alert('Some selected customers are missing phone numbers. Please add phone numbers or switch to email delivery.');
+      return;
+    }
+
+    const newRequests = selectedCustomers.map(customerId => {
+      const customer = customers.find(c => c.id === customerId);
+      return {
+        id: Date.now() + customerId,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        sentAt: scheduleTiming === 'immediate' ? new Date().toLocaleString() : 'Scheduled',
+        status: scheduleTiming === 'immediate' ? 'Sent' : 'Scheduled',
+        method: deliveryMethod === 'sms' ? 'SMS' : deliveryMethod === 'both' ? 'Email + SMS' : 'Email'
+      };
+    });
+
+    setSentRequests([...newRequests, ...sentRequests]);
+    setSelectedCustomers([]);
+    setShowBulkSuccess(true);
+    setTimeout(() => setShowBulkSuccess(false), 3000);
+  };
+
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      alert(`CSV upload functionality ready! File "${file.name}" would be processed here. In production, this would parse your CSV and add customers to the database.`);
+    }
+  };
+
+  const getFilteredCustomers = () => {
+    if (!searchTerm) return customers;
+    return customers.filter(c => 
+      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.phone.includes(searchTerm)
+    );
+  };
+
+  const stats = {
+    totalRequests: sentRequests.length,
+    totalReviews: reviews.length,
+    openRate: sentRequests.length > 0 ? Math.round((sentRequests.filter(r => r.status !== 'Sent').length / sentRequests.length) * 100) : 0,
+    conversionRate: sentRequests.length > 0 ? Math.round((sentRequests.filter(r => r.status === 'Reviewed').length / sentRequests.length) * 100) : 0,
+    avgRating: reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : 0,
+    responseRate: reviews.length > 0 ? Math.round((reviews.filter(r => r.responded).length / reviews.length) * 100) : 0,
+    positiveReviews: reviews.filter(r => r.rating >= 4).length,
+    negativeReviews: reviews.filter(r => r.rating <= 2).length,
+    neutralReviews: reviews.filter(r => r.rating === 3).length,
+    sentimentScore: reviews.length > 0 ? Math.round((reviews.filter(r => r.rating >= 4).length / reviews.length) * 100) : 0,
+    platformBreakdown: {
+      google: reviews.filter(r => r.platform === 'Google').length,
+      yelp: reviews.filter(r => r.platform === 'Yelp').length,
+      facebook: reviews.filter(r => r.platform === 'Facebook').length,
+      trustpilot: reviews.filter(r => r.platform === 'Trustpilot').length,
+      tripadvisor: reviews.filter(r => r.platform === 'TripAdvisor').length
+    }
+  };
+
+  const markNotificationAsRead = (id) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    ));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
+
+  const simulateSync = () => {
+    setLastSyncTime(new Date());
+    alert('Reviews synced successfully! In production, this would fetch new reviews from all connected platforms.');
+  };
+
+  const getNotificationIcon = (type) => {
+    if (type === 'negative_review') return <AlertCircle className="text-red-500" size={20} />;
+    if (type === 'positive_review') return <Star className="text-yellow-500 fill-yellow-500" size={20} />;
+    return <Bell className="text-blue-500" size={20} />;
+  };
+
+  const getPlatformColor = (platform) => {
+    const colors = {
+      'Google': 'bg-blue-50 text-blue-700 border-blue-200',
+      'Yelp': 'bg-red-50 text-red-700 border-red-200',
+      'Facebook': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      'Trustpilot': 'bg-green-50 text-green-700 border-green-200',
+      'TripAdvisor': 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    };
+    return colors[platform] || 'bg-gray-50 text-gray-700 border-gray-200';
+  };
+
+  const getPlatformIcon = (platform) => {
+    return platform.charAt(0);
+  };
+
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <div className="text-sm text-gray-500">Last updated: {new Date().toLocaleString()}</div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Total Reviews</p>
+              <p className="text-4xl font-bold mt-2">{stats.totalReviews}</p>
+              <p className="text-blue-100 text-xs mt-2">Avg: {stats.avgRating} ★</p>
+            </div>
+            <Star className="text-blue-200" size={40} />
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">Response Rate</p>
+              <p className="text-4xl font-bold mt-2">{stats.responseRate}%</p>
+              <p className="text-green-100 text-xs mt-2">{reviews.filter(r => r.responded).length} of {reviews.length}</p>
+            </div>
+            <MessageSquare className="text-green-200" size={40} />
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium">Requests Sent</p>
+              <p className="text-4xl font-bold mt-2">{stats.totalRequests}</p>
+              <p className="text-purple-100 text-xs mt-2">+12% from last week</p>
+            </div>
+            <Mail className="text-purple-200" size={40} />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100 text-sm font-medium">AI Responses</p>
+              <p className="text-4xl font-bold mt-2">{reviews.filter(r => r.responded).length}</p>
+              <p className="text-orange-100 text-xs mt-2">Powered by AI</p>
+            </div>
+            <Sparkles className="text-orange-200" size={40} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border">
+          <h3 className="text-lg font-semibold mb-4">Recent Reviews - All Platforms</h3>
+          {reviews.length === 0 ? (
+            <div className="text-center py-12">
+              <Star className="mx-auto text-gray-300 mb-3" size={48} />
+              <p className="text-gray-500">No reviews yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {reviews.slice(0, 5).map(review => (
+                <div key={review.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-medium text-gray-900">{review.customerName}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={14}
+                              className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-gray-500">{review.date}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {review.responded && (
+                        <CheckCircle className="text-green-500" size={20} />
+                      )}
+                      <span className={`text-xs px-2 py-1 rounded font-medium border ${getPlatformColor(review.platform)}`}>
+                        {review.platform}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 line-clamp-2">{review.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4">Reviews by Platform</h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Google', count: stats.platformBreakdown.google, color: 'blue' },
+                { name: 'Yelp', count: stats.platformBreakdown.yelp, color: 'red' },
+                { name: 'Facebook', count: stats.platformBreakdown.facebook, color: 'indigo' },
+                { name: 'Trustpilot', count: stats.platformBreakdown.trustpilot, color: 'green' },
+                { name: 'TripAdvisor', count: stats.platformBreakdown.tripadvisor, color: 'emerald' }
+              ].map(platform => (
+                <div key={platform.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 bg-${platform.color}-100 rounded-lg flex items-center justify-center`}>
+                      <span className={`text-${platform.color}-600 font-bold`}>{platform.name.charAt(0)}</span>
+                    </div>
+                    <span className="font-medium text-gray-900">{platform.name}</span>
+                  </div>
+                  <span className="text-2xl font-bold text-gray-900">{platform.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+            <div className="space-y-3">
+              <button 
+                onClick={() => setActiveTab('ai-responses')}
+                className="w-full bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-purple-700 p-4 rounded-lg font-medium transition flex items-center justify-between border border-purple-200"
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles size={20} />
+                  Response Board
+                </span>
+                <span className="text-2xl font-bold">{reviews.filter(r => !r.responded).length}</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('customers')}
+                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 p-4 rounded-lg font-medium transition flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <Users size={20} />
+                  Manage Customers
+                </span>
+                <span className="text-2xl font-bold">{customers.length}</span>
+              </button>
+              
+              <button 
+                onClick={() => setActiveTab('customers')}
+                className="w-full bg-green-50 hover:bg-green-100 text-green-700 p-4 rounded-lg font-medium transition flex items-center gap-2"
+              >
+                <Send size={20} />
+                Send Bulk Requests
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
+        <div className="flex items-start gap-3">
+          <Sparkles className="text-purple-600 flex-shrink-0 mt-0.5" size={24} />
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">Multi-Platform Power</p>
+            <p className="text-sm text-gray-600">
+              You're now collecting and managing reviews from {Object.values(stats.platformBreakdown).filter(c => c > 0).length} platforms! Keep engaging with customers across all channels for maximum impact.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAIResponses = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Response Board</h1>
+          <p className="text-gray-600 mt-1">Generate personalized responses to customer reviews instantly</p>
+        </div>
+        <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 px-4 py-2 rounded-lg border border-purple-200">
+          <Sparkles className="text-purple-600" size={20} />
+          <span className="text-sm font-medium text-purple-900">AI Powered</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div className="p-6 border-b bg-gray-50">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Reviews Needing Response</h3>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                  {reviews.filter(r => !r.responded).length} pending
+                </span>
+              </div>
+            </div>
+            
+            <div className="divide-y max-h-[600px] overflow-y-auto">
+              {reviews.filter(r => !r.responded).length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckCircle className="mx-auto text-green-500 mb-3" size={48} />
+                  <p className="text-gray-500 font-medium">All caught up!</p>
+                  <p className="text-sm text-gray-400 mt-1">You've responded to all reviews</p>
+                </div>
+              ) : (
+                reviews.filter(r => !r.responded).map(review => (
+                  <div key={review.id} className="p-6 hover:bg-gray-50 transition">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-900">{review.customerName}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                size={16}
+                                className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                              />
+                            ))}
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            review.sentiment === 'positive' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            {review.sentiment}
+                          </span>
+                          <span className="text-xs text-gray-500">{review.date}</span>
+                        </div>
+                      </div>
+                      <span className={`text-xs px-3 py-1.5 rounded font-medium border ${getPlatformColor(review.platform)}`}>
+                        {review.platform}
+                      </span>
+                    </div>
+                    
+                    <p className="text-gray-700 mb-4 leading-relaxed">{review.text}</p>
+                    
+                    <button
+                      onClick={() => generateAIResponse(review)}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg font-medium transition flex items-center gap-2"
+                    >
+                      <Sparkles size={18} />
+                      Generate AI Response
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="text-lg font-semibold mb-4">Response Settings</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Response Style
+                </label>
+                <select
+                  value={responseStyle}
+                  onChange={(e) => setResponseStyle(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="professional">Professional</option>
+                  <option value="friendly">Friendly</option>
+                  <option value="formal">Formal</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Business Description
+                </label>
+                <textarea
+                  value={businessDescription}
+                  onChange={(e) => setBusinessDescription(e.target.value)}
+                  rows="4"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Tell us about your business..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  This helps AI generate more personalized responses
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
+            <div className="flex items-start gap-3">
+              <Sparkles className="text-purple-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-purple-900 mb-2">How Response Board Works</h4>
+                <ul className="text-sm text-purple-800 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-0.5">•</span>
+                    <span>AI analyzes review sentiment and rating</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-0.5">•</span>
+                    <span>Generates personalized response in your brand voice</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-0.5">•</span>
+                    <span>You can edit before posting</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 mt-0.5">•</span>
+                    <span>Saves hours of manual work</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {selectedReview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b bg-gradient-to-r from-purple-50 to-pink-50">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Sparkles className="text-purple-600" size={24} />
+                AI Generated Response
+              </h3>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="bg-gray-50 rounded-lg p-4 border">
+                <p className="text-sm font-medium text-gray-700 mb-2">Original Review:</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="font-semibold">{selectedReview.customerName}</p>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        className={i < selectedReview.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-gray-700">{selectedReview.text}</p>
+              </div>
+
+              {isGenerating ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600 mb-4"></div>
+                  <p className="text-gray-600 font-medium">AI is crafting your response...</p>
+                  <p className="text-sm text-gray-500 mt-1">This will take just a moment</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Generated Response:
+                    </label>
+                    <button
+                      onClick={() => generateAIResponse(selectedReview)}
+                      className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                    >
+                      <RefreshCw size={14} />
+                      Regenerate
+                    </button>
+                  </div>
+                  <textarea
+                    value={generatedResponse}
+                    onChange={(e) => setGeneratedResponse(e.target.value)}
+                    rows="8"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    You can edit this response before applying it
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setSelectedReview(null);
+                  setGeneratedResponse('');
+                }}
+                className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => copyToClipboard(generatedResponse)}
+                disabled={!generatedResponse}
+                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Copy size={18} />
+                Copy
+              </button>
+              <button
+                onClick={applyResponseToReview}
+                disabled={!generatedResponse}
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Apply Response
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSentimentAnalysis = () => {
+    const positiveKeywords = {};
+    const negativeKeywords = {};
+    
+    reviews.forEach(review => {
+      review.keywords.forEach(keyword => {
+        if (review.sentiment === 'positive') {
+          positiveKeywords[keyword] = (positiveKeywords[keyword] || 0) + 1;
+        } else if (review.sentiment === 'negative') {
+          negativeKeywords[keyword] = (negativeKeywords[keyword] || 0) + 1;
+        }
+      });
+    });
+
+    const topPositive = Object.entries(positiveKeywords)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+    
+    const topNegative = Object.entries(negativeKeywords)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    const renderOverview = () => (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Positive Reviews</h3>
+              <Smile className="text-green-500" size={24} />
+            </div>
+            <p className="text-4xl font-bold text-green-600">{stats.positiveReviews}</p>
+            <p className="text-sm text-gray-600 mt-2">
+              {stats.positiveReviews > 0 ? Math.round((stats.positiveReviews / reviews.length) * 100) : 0}% of total
+            </p>
+            <div className="mt-4 bg-green-50 rounded-lg p-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-green-700">Sentiment Score</span>
+                <span className="font-bold text-green-900">{stats.sentimentScore}%</span>
+              </div>
+              <div className="mt-2 w-full bg-green-200 rounded-full h-2">
+                <div 
+                  className="bg-green-600 h-2 rounded-full transition-all"
+                  style={{ width: `${stats.sentimentScore}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Neutral Reviews</h3>
+              <Meh className="text-yellow-500" size={24} />
+            </div>
+            <p className="text-4xl font-bold text-yellow-600">{stats.neutralReviews}</p>
+            <p className="text-sm text-gray-600 mt-2">
+              {stats.neutralReviews > 0 ? Math.round((stats.neutralReviews / reviews.length) * 100) : 0}% of total
+            </p>
+            <div className="mt-4 bg-yellow-50 rounded-lg p-3">
+              <p className="text-sm text-yellow-800">
+                <strong>Opportunity:</strong> Follow up with neutral reviewers to improve their experience
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Negative Reviews</h3>
+              <Frown className="text-red-500" size={24} />
+            </div>
+            <p className="text-4xl font-bold text-red-600">{stats.negativeReviews}</p>
+            <p className="text-sm text-gray-600 mt-2">
+              {stats.negativeReviews > 0 ? Math.round((stats.negativeReviews / reviews.length) * 100) : 0}% of total
+            </p>
+            <div className="mt-4 bg-red-50 rounded-lg p-3">
+              <p className="text-sm text-red-800">
+                <strong>Action Required:</strong> {reviews.filter(r => r.rating <= 2 && !r.responded).length} need responses
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <TrendingUp className="text-blue-600" size={20} />
+              Rating Distribution
+            </h3>
+            <div className="space-y-3">
+              {[5, 4, 3, 2, 1].map(rating => {
+                const count = reviews.filter(r => r.rating === rating).length;
+                const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                return (
+                  <div key={rating} className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 w-20">
+                      <span className="text-sm font-medium">{rating}</span>
+                      <Star size={14} className="fill-yellow-400 text-yellow-400" />
+                    </div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-3">
+                      <div 
+                        className={`h-3 rounded-full transition-all ${
+                          rating >= 4 ? 'bg-green-500' : 
+                          rating === 3 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 w-12 text-right">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-6 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Average Rating</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-gray-900">{stats.avgRating}</span>
+                  <Star size={20} className="fill-yellow-400 text-yellow-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <BarChart3 className="text-purple-600" size={20} />
+              Sentiment Trend (Last 30 Days)
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Positive Trend</span>
+                </div>
+                <span className="text-lg font-bold text-green-600">+12%</span>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Neutral Trend</span>
+                </div>
+                <span className="text-lg font-bold text-yellow-600">-3%</span>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Negative Trend</span>
+                </div>
+                <span className="text-lg font-bold text-red-600">-9%</span>
+              </div>
+
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex items-center gap-2 text-green-600">
+                  <TrendingUp size={20} />
+                  <span className="text-sm font-medium">Overall sentiment improving</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  Your positive reviews increased by 12% compared to last month
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const renderKeywords = () => (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <ThumbsUp className="text-green-600" size={20} />
+              Top Positive Keywords
+            </h3>
+            {topPositive.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No positive keywords yet</p>
+            ) : (
+              <div className="space-y-3">
+                {topPositive.map(([keyword, count], index) => (
+                  <div key={keyword} className="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-green-600">#{index + 1}</span>
+                      <span className="font-medium text-gray-900 capitalize">{keyword}</span>
+                    </div>
+                    <span className="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm font-semibold">
+                      {count} mentions
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <p className="text-sm font-semibold text-green-900 mb-1">💡 Insight</p>
+              <p className="text-sm text-green-800">
+                Use these positive keywords in your marketing materials to attract more customers
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <ThumbsDown className="text-red-600" size={20} />
+              Top Negative Keywords
+            </h3>
+            {topNegative.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No negative keywords - great job!</p>
+            ) : (
+              <div className="space-y-3">
+                {topNegative.map(([keyword, count], index) => (
+                  <div key={keyword} className="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-red-600">#{index + 1}</span>
+                      <span className="font-medium text-gray-900 capitalize">{keyword}</span>
+                    </div>
+                    <span className="px-3 py-1 bg-red-200 text-red-800 rounded-full text-sm font-semibold">
+                      {count} mentions
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm font-semibold text-red-900 mb-1">⚠️ Action Required</p>
+              <p className="text-sm text-red-800">
+                Address these issues to improve customer satisfaction and reduce negative reviews
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <MessageSquare className="text-blue-600" size={20} />
+            Keyword Cloud Analysis
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {topPositive.map(([keyword, count]) => (
+              <span 
+                key={keyword}
+                className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium hover:bg-green-200 transition cursor-pointer"
+                style={{ fontSize: `${Math.min(12 + count * 2, 20)}px` }}
+              >
+                {keyword}
+              </span>
+            ))}
+            {topNegative.map(([keyword, count]) => (
+              <span 
+                key={keyword}
+                className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 transition cursor-pointer"
+                style={{ fontSize: `${Math.min(12 + count * 2, 20)}px` }}
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const renderEmotions = () => (
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Smile className="text-purple-600" size={20} />
+            Emotional Breakdown
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { emotion: 'Joy', count: reviews.filter(r => r.emotions?.includes('joy')).length, color: 'green', icon: '😊' },
+              { emotion: 'Satisfaction', count: reviews.filter(r => r.emotions?.includes('satisfaction')).length, color: 'blue', icon: '😌' },
+              { emotion: 'Gratitude', count: reviews.filter(r => r.emotions?.includes('gratitude')).length, color: 'purple', icon: '🙏' },
+              { emotion: 'Frustration', count: reviews.filter(r => r.emotions?.includes('frustration')).length, color: 'orange', icon: '😤' },
+              { emotion: 'Disappointment', count: reviews.filter(r => r.emotions?.includes('disappointment')).length, color: 'red', icon: '😞' },
+              { emotion: 'Anger', count: reviews.filter(r => r.emotions?.includes('anger')).length, color: 'red', icon: '😠' }
+            ].map(({ emotion, count, color, icon }) => (
+              <div key={emotion} className={`p-4 bg-${color}-50 rounded-lg border border-${color}-200`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl">{icon}</span>
+                  <span className={`text-2xl font-bold text-${color}-600`}>{count}</span>
+                </div>
+                <p className="text-sm font-medium text-gray-700">{emotion}</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0}% of reviews
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <h3 className="text-lg font-semibold mb-4">Reviews by Emotion</h3>
+          <div className="space-y-4">
+            {reviews.map(review => (
+              <div key={review.id} className="p-4 bg-gray-50 rounded-lg border">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="font-medium text-gray-900">{review.customerName}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={14}
+                            className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-500">{review.date}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    {review.emotions?.map(emotion => (
+                      <span key={emotion} className={`text-xs px-2 py-1 rounded-full ${
+                        ['joy', 'satisfaction', 'gratitude'].includes(emotion) 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {emotion}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700">{review.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Sentiment Analysis</h1>
+            <p className="text-gray-600 mt-1">Understand what customers are saying about your business</p>
+          </div>
+          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-4 py-2 rounded-lg border border-blue-200">
+            <TrendingUp className="text-blue-600" size={20} />
+            <span className="text-sm font-medium text-blue-900">AI Powered Insights</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="flex border-b">
+            <button
+              onClick={() => setSentimentTab('overview')}
+              className={`px-6 py-3 font-medium transition ${
+                sentimentTab === 'overview'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setSentimentTab('keywords')}
+              className={`px-6 py-3 font-medium transition ${
+                sentimentTab === 'keywords'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Keywords
+            </button>
+            <button
+              onClick={() => setSentimentTab('emotions')}
+              className={`px-6 py-3 font-medium transition ${
+                sentimentTab === 'emotions'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Emotions
+            </button>
+          </div>
+          
+          <div className="p-6">
+            {sentimentTab === 'overview' && renderOverview()}
+            {sentimentTab === 'keywords' && renderKeywords()}
+            {sentimentTab === 'emotions' && renderEmotions()}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-green-900 mb-2">What's Working Well</h4>
+                <ul className="text-sm text-green-800 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-0.5">•</span>
+                    <span>Customers love your professional service and attention to detail</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-0.5">•</span>
+                    <span>Team friendliness is consistently mentioned positively</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 mt-0.5">•</span>
+                    <span>Overall satisfaction is trending upward</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl border border-red-200 p-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-red-900 mb-2">Areas for Improvement</h4>
+                <ul className="text-sm text-red-800 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 mt-0.5">•</span>
+                    <span>Wait times are a recurring complaint - consider optimizing scheduling</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 mt-0.5">•</span>
+                    <span>Some customers feel staff appears overwhelmed during busy periods</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-600 mt-0.5">•</span>
+                    <span>Product quality expectations not always met - review standards</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTemplates = () => {
+    const categories = ['All', 'General', 'Restaurant', 'E-commerce', 'Professional Services', 'Healthcare', 'Automotive'];
+    const [filterCategory, setFilterCategory] = useState('All');
+    
+    const filteredTemplates = filterCategory === 'All' 
+      ? templates 
+      : templates.filter(t => t.category === filterCategory);
+
+    const handleUseTemplate = (template) => {
+      setEmailSubject(template.emailSubject);
+      setSmsMessage(template.smsBody);
+      alert(`Template "${template.name}" applied! Go to Customers tab to send.`);
+    };
+
+    const handleSetDefault = (templateId) => {
+      setTemplates(templates.map(t => ({
+        ...t,
+        isDefault: t.id === templateId
+      })));
+    };
+
+    const handleDeleteTemplate = (id) => {
+      if (confirm('Are you sure you want to delete this template?')) {
+        setTemplates(templates.filter(t => t.id !== id));
+      }
+    };
+
+    const handleCreateTemplate = () => {
+      if (!newTemplate.name || !newTemplate.emailSubject || !newTemplate.emailBody) {
+        alert('Please fill in template name, email subject, and email body');
+        return;
+      }
+
+      const template = {
+        id: Date.now(),
+        ...newTemplate,
+        performance: { sent: 0, opened: 0, reviewed: 0, rating: 0 },
+        isDefault: false,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      setTemplates([template, ...templates]);
+      setNewTemplate({
+        name: '',
+        category: 'General',
+        emailSubject: '',
+        emailBody: '',
+        smsBody: ''
+      });
+      setIsCreatingTemplate(false);
+      alert('Template created successfully!');
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Template Library</h1>
+            <p className="text-gray-600 mt-1">Pre-written templates to boost your review conversion rates</p>
+          </div>
+          <button
+            onClick={() => setIsCreatingTemplate(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition shadow-sm"
+          >
+            <Plus size={20} />
+            Create Template
+          </button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="flex flex-wrap gap-2 mb-6">
+            {categories.map(category => (
+              <button
+                key={category}
+                onClick={() => setFilterCategory(category)}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  filterCategory === category
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {filteredTemplates.map(template => (
+              <div key={template.id} className="border rounded-lg p-6 hover:shadow-md transition">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                      {template.isDefault && (
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded font-medium">
+                      {template.category}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleSetDefault(template.id)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                      title="Set as default"
+                    >
+                      <Star size={18} className={template.isDefault ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTemplate(template.id)}
+                      className="p-2 hover:bg-red-50 rounded-lg transition"
+                      title="Delete template"
+                    >
+                      <Trash size={18} className="text-red-600" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-4">
+                  <div>
+                    <p className="text-xs font-medium text-gray-600 mb-1">Email Subject:</p>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {template.emailSubject}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xs font-medium text-gray-600 mb-1">Email Body:</p>
+                    <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded line-clamp-3">
+                      {template.emailBody}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium text-gray-600 mb-1">SMS:</p>
+                    <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
+                      {template.smsBody}
+                    </p>
+                  </div>
+                </div>
+
+                {template.performance.sent > 0 && (
+                  <div className="grid grid-cols-4 gap-2 mb-4 p-3 bg-blue-50 rounded-lg">
+                    <div>
+                      <p className="text-xs text-gray-600">Sent</p>
+                      <p className="text-sm font-bold text-gray-900">{template.performance.sent}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Opened</p>
+                      <p className="text-sm font-bold text-gray-900">{template.performance.opened}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Reviews</p>
+                      <p className="text-sm font-bold text-gray-900">{template.performance.reviewed}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Conv Rate</p>
+                      <p className="text-sm font-bold text-green-600">
+                        {Math.round((template.performance.reviewed / template.performance.sent) * 100)}%
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => handleUseTemplate(template)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition"
+                >
+                  Use This Template
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {filteredTemplates.length === 0 && (
+            <div className="text-center py-12">
+              <FileText className="mx-auto text-gray-300 mb-3" size={48} />
+              <p className="text-gray-500">No templates in this category</p>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+            <div className="flex items-start gap-3">
+              <TrendingUp className="text-blue-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-blue-900 mb-2">Best Performing Template</h4>
+                <p className="text-sm text-blue-800 mb-2">
+                  <strong>"{templates.reduce((best, t) => t.performance.reviewed > best.performance.reviewed ? t : best, templates[0]).name}"</strong>
+                </p>
+                <p className="text-xs text-blue-700">
+                  {Math.round((templates.reduce((best, t) => t.performance.reviewed > best.performance.reviewed ? t : best, templates[0]).performance.reviewed / templates.reduce((best, t) => t.performance.reviewed > best.performance.reviewed ? t : best, templates[0]).performance.sent) * 100)}% conversion rate
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-green-900 mb-2">Template Tips</h4>
+                <ul className="text-sm text-green-800 space-y-1">
+                  <li>• Personalize with {'{name}'}</li>
+                  <li>• Keep SMS under 160 chars</li>
+                  <li>• Ask within 24-48 hours</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
+            <div className="flex items-start gap-3">
+              <Sparkles className="text-purple-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-purple-900 mb-2">Available Placeholders</h4>
+                <p className="text-sm text-purple-800">
+                  {'{name}'}, {'{business}'}, {'{link}'}
+                </p>
+                <p className="text-xs text-purple-700 mt-2">
+                  Auto-replaced when sending
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isCreatingTemplate && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+                <h3 className="text-xl font-bold text-gray-900">Create New Template</h3>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Template Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTemplate.name}
+                    onChange={(e) => setNewTemplate({...newTemplate, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Restaurant Thank You"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category *
+                  </label>
+                  <select
+                    value={newTemplate.category}
+                    onChange={(e) => setNewTemplate({...newTemplate, category: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="General">General</option>
+                    <option value="Restaurant">Restaurant</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Professional Services">Professional Services</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Automotive">Automotive</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Subject *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTemplate.emailSubject}
+                    onChange={(e) => setNewTemplate({...newTemplate, emailSubject: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="How was your experience with {business}?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Body *
+                  </label>
+                  <textarea
+                    value={newTemplate.emailBody}
+                    onChange={(e) => setNewTemplate({...newTemplate, emailBody: e.target.value})}
+                    rows="8"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Hi {name},&#10;&#10;Thank you for choosing {business}...&#10;&#10;{link}"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    SMS Message
+                  </label>
+                  <textarea
+                    value={newTemplate.smsBody}
+                    onChange={(e) => setNewTemplate({...newTemplate, smsBody: e.target.value})}
+                    rows="3"
+                    maxLength="160"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Hi {name}! Thanks for choosing {business}. Leave us a review: {link}"
+                  />
+                  <p className="text-xs text-gray-600 mt-1">
+                    {newTemplate.smsBody.length}/160 characters
+                  </p>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-900 mb-2">Available Placeholders:</p>
+                  <div className="flex flex-wrap gap-2">
+                    <code className="px-2 py-1 bg-white rounded text-xs">{'{name}'}</code>
+                    <code className="px-2 py-1 bg-white rounded text-xs">{'{business}'}</code>
+                    <code className="px-2 py-1 bg-white rounded text-xs">{'{link}'}</code>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setIsCreatingTemplate(false);
+                    setNewTemplate({
+                      name: '',
+                      category: 'General',
+                      emailSubject: '',
+                      emailBody: '',
+                      smsBody: ''
+                    });
+                  }}
+                  className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateTemplate}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                >
+                  Create Template
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderQRCodes = () => {
+    const handleCreateQR = () => {
+      if (!newQR.name) {
+        alert('Please enter a name for your QR code');
+        return;
+      }
+
+      const qr = {
+        id: Date.now(),
+        ...newQR,
+        scans: 0,
+        reviews: 0,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      setQrCodes([qr, ...qrCodes]);
+      setNewQR({
+        name: '',
+        platform: 'Google',
+        style: 'standard',
+        size: 'medium',
+        includeText: true,
+        customText: 'Scan to Review Us!'
+      });
+      setIsCreatingQR(false);
+      alert('QR Code created! In production, this would generate an actual QR code image.');
+    };
+
+    const handleDeleteQR = (id) => {
+      if (confirm('Are you sure you want to delete this QR code?')) {
+        setQrCodes(qrCodes.filter(q => q.id !== id));
+      }
+    };
+
+    const handleDownloadQR = (qrCode) => {
+      alert(`Downloading QR code "${qrCode.name}"...\n\nIn production, this would generate and download:\n- PNG (high-res for printing)\n- SVG (vector format)\n- PDF (ready to print)`);
+    };
+
+    const getPlatformLink = (platform) => {
+      const links = {
+        'Google': placeId ? `https://search.google.com/local/writereview?placeid=${placeId}` : '#',
+        'Yelp': yelpUrl || '#',
+        'Facebook': facebookUrl || '#',
+        'Trustpilot': trustpilotUrl || '#',
+        'TripAdvisor': tripadvisorUrl || '#'
+      };
+      return links[platform];
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">QR Code Generator</h1>
+            <p className="text-gray-600 mt-1">Create scannable QR codes for in-person review collection</p>
+          </div>
+          <button
+            onClick={() => setIsCreatingQR(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition shadow-sm"
+          >
+            <Plus size={20} />
+            Generate QR Code
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">Total QR Codes</p>
+                <p className="text-4xl font-bold mt-2">{qrCodes.length}</p>
+              </div>
+              <QrCode className="text-blue-200" size={40} />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm font-medium">Total Scans</p>
+                <p className="text-4xl font-bold mt-2">{qrCodes.reduce((sum, qr) => sum + qr.scans, 0)}</p>
+              </div>
+              <Eye className="text-green-200" size={40} />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">Reviews from QR</p>
+                <p className="text-4xl font-bold mt-2">{qrCodes.reduce((sum, qr) => sum + qr.reviews, 0)}</p>
+              </div>
+              <Star className="text-purple-200" size={40} />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-sm font-medium">Scan Conversion</p>
+                <p className="text-4xl font-bold mt-2">
+                  {qrCodes.reduce((sum, qr) => sum + qr.scans, 0) > 0 
+                    ? Math.round((qrCodes.reduce((sum, qr) => sum + qr.reviews, 0) / qrCodes.reduce((sum, qr) => sum + qr.scans, 0)) * 100)
+                    : 0}%
+                </p>
+              </div>
+              <TrendingUp className="text-orange-200" size={40} />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {qrCodes.map(qr => (
+            <div key={qr.id} className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">{qr.name}</h3>
+                    <span className={`text-xs px-2 py-1 rounded font-medium border ${getPlatformColor(qr.platform)}`}>
+                      {qr.platform}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteQR(qr.id)}
+                    className="p-2 hover:bg-red-50 rounded-lg transition"
+                  >
+                    <Trash size={18} className="text-red-600" />
+                  </button>
+                </div>
+
+                <div className="bg-gray-100 rounded-lg p-8 mb-4 flex items-center justify-center">
+                  <div className="text-center">
+                    <QrCode size={120} className="text-gray-800 mx-auto mb-2" />
+                    {qr.includeText && (
+                      <p className="text-sm font-medium text-gray-700">{qr.customText}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="text-center p-2 bg-blue-50 rounded">
+                    <p className="text-xs text-gray-600">Scans</p>
+                    <p className="text-lg font-bold text-gray-900">{qr.scans}</p>
+                  </div>
+                  <div className="text-center p-2 bg-green-50 rounded">
+                    <p className="text-xs text-gray-600">Reviews</p>
+                    <p className="text-lg font-bold text-gray-900">{qr.reviews}</p>
+                  </div>
+                  <div className="text-center p-2 bg-purple-50 rounded">
+                    <p className="text-xs text-gray-600">Conv %</p>
+                    <p className="text-lg font-bold text-gray-900">
+                      {qr.scans > 0 ? Math.round((qr.reviews / qr.scans) * 100) : 0}%
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleDownloadQR(qr)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                  >
+                    <Download size={18} />
+                    Download
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(getPlatformLink(qr.platform));
+                      alert('Link copied to clipboard!');
+                    }}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                  >
+                    <Copy size={18} />
+                    Copy Link
+                  </button>
+                </div>
+
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-xs text-gray-500">
+                    Created: {qr.createdAt} • {qr.style} • {qr.size}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {qrCodes.length === 0 && (
+          <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
+            <QrCode className="mx-auto text-gray-300 mb-4" size={64} />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No QR Codes Yet</h3>
+            <p className="text-gray-600 mb-6">Create your first QR code to start collecting reviews in person</p>
+            <button
+              onClick={() => setIsCreatingQR(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
+            >
+              Generate Your First QR Code
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+            <div className="flex items-start gap-3">
+              <Printer className="text-blue-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-blue-900 mb-2">Print Formats</h4>
+                <p className="text-sm text-blue-800">
+                  Download as PNG, SVG, or PDF. Perfect for receipts, table tents, posters, and business cards.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+            <div className="flex items-start gap-3">
+              <TrendingUp className="text-green-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-green-900 mb-2">Track Performance</h4>
+                <p className="text-sm text-green-800">
+                  Monitor scans, reviews, and conversion rates for each QR code to optimize placement.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
+            <div className="flex items-start gap-3">
+              <Star className="text-purple-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-purple-900 mb-2">Best Practices</h4>
+                <ul className="text-sm text-purple-800 space-y-1">
+                  <li>• Place near checkout</li>
+                  <li>• Include on receipts</li>
+                  <li>• Add to table tents</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isCreatingQR && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+                <h3 className="text-xl font-bold text-gray-900">Generate New QR Code</h3>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    QR Code Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newQR.name}
+                    onChange={(e) => setNewQR({...newQR, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Front Counter QR Code"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Review Platform *
+                  </label>
+                  <select
+                    value={newQR.platform}
+                    onChange={(e) => setNewQR({...newQR, platform: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Google">Google</option>
+                    <option value="Yelp">Yelp</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="Trustpilot">Trustpilot</option>
+                    <option value="TripAdvisor">TripAdvisor</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    QR Code Style
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {['standard', 'rounded', 'dots'].map(style => (
+                      <button
+                        key={style}
+                        onClick={() => setNewQR({...newQR, style})}
+                        className={`p-4 border-2 rounded-lg transition ${
+                          newQR.style === style
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <QrCode className="mx-auto mb-2" size={40} />
+                        <p className="text-sm font-medium capitalize">{style}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Size
+                  </label>
+                  <select
+                    value={newQR.size}
+                    onChange={(e) => setNewQR({...newQR, size: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="small">Small (200x200px) - Business cards</option>
+                    <option value="medium">Medium (400x400px) - Receipts</option>
+                    <option value="large">Large (800x800px) - Posters</option>
+                    <option value="xlarge">Extra Large (1200x1200px) - Signage</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newQR.includeText}
+                      onChange={(e) => setNewQR({...newQR, includeText: e.target.checked})}
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Include Text Below QR Code</p>
+                      <p className="text-xs text-gray-600">Add a call-to-action message</p>
+                    </div>
+                  </label>
+                </div>
+
+                {newQR.includeText && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Custom Text
+                    </label>
+                    <input
+                      type="text"
+                      value={newQR.customText}
+                      onChange={(e) => setNewQR({...newQR, customText: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Scan to Review Us!"
+                    />
+                  </div>
+                )}
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-900 mb-2">Preview:</p>
+                  <div className="bg-white p-4 rounded text-center">
+                    <QrCode size={80} className="mx-auto text-gray-800" />
+                    {newQR.includeText && (
+                      <p className="text-sm font-medium text-gray-700 mt-2">{newQR.customText}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Tip:</strong> Place QR codes where customers naturally pause - checkout counters, waiting areas, or on receipts for best results.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setIsCreatingQR(false);
+                    setNewQR({
+                      name: '',
+                      platform: 'Google',
+                      style: 'standard',
+                      size: 'medium',
+                      includeText: true,
+                      customText: 'Scan to Review Us!'
+                    });
+                  }}
+                  className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateQR}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2"
+                >
+                  <QrCode size={18} />
+                  Generate QR Code
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderNotifications = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Notifications & Monitoring</h1>
+          <p className="text-gray-600 mt-1">Real-time alerts for new reviews across all platforms</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={simulateSync}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+          >
+            <RefreshCcw size={18} />
+            Sync Now
+          </button>
+          {notifications.length > 0 && (
+            <button
+              onClick={clearAllNotifications}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition"
+            >
+              Clear All
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border">
+            <div className="p-6 border-b bg-gray-50">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Recent Alerts</h3>
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${autoSync ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                  <span className="text-sm text-gray-600">
+                    {autoSync ? 'Auto-sync active' : 'Auto-sync paused'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="divide-y max-h-[600px] overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="text-center py-12">
+                  <Bell className="mx-auto text-gray-300 mb-3" size={48} />
+                  <p className="text-gray-500 font-medium">All caught up!</p>
+                  <p className="text-sm text-gray-400 mt-1">You'll be notified when new reviews arrive</p>
+                </div>
+              ) : (
+                notifications.map(notification => (
+                  <div
+                    key={notification.id}
+                    className={`p-6 hover:bg-gray-50 transition cursor-pointer ${
+                      !notification.read ? 'bg-blue-50' : ''
+                    }`}
+                    onClick={() => markNotificationAsRead(notification.id)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="mt-1">
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-gray-900">
+                              {notification.type === 'negative_review' ? '⚠️ Urgent: Negative Review' :
+                               notification.type === 'positive_review' ? '🎉 New 5-Star Review!' :
+                               '📝 New Review Received'}
+                            </h4>
+                            {!notification.read && (
+                              <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-700 mb-2">
+                            <strong>{notification.customerName}</strong> left a {notification.rating}-star review on <strong>{notification.platform}</strong>
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={14}
+                                  className={i < notification.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                                />
+                              ))}
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded font-medium border ${getPlatformColor(notification.platform)}`}>
+                              {notification.platform}
+                            </span>
+                            <span className="text-xs text-gray-500">{notification.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveTab('ai-responses');
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
+                      >
+                        Respond →
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Settings size={20} />
+              Monitoring Settings
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">Auto-Sync</p>
+                  <p className="text-xs text-gray-600">Pull new reviews automatically</p>
+                </div>
+                <button
+                  onClick={() => setAutoSync(!autoSync)}
+                  className={`w-12 h-6 rounded-full transition ${
+                    autoSync ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <div className={`w-5 h-5 bg-white rounded-full shadow transition transform ${
+                    autoSync ? 'translate-x-6' : 'translate-x-0.5'
+                  }`}></div>
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sync Frequency
+                </label>
+                <select
+                  value={syncFrequency}
+                  onChange={(e) => setSyncFrequency(e.target.value)}
+                  disabled={!autoSync}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="5min">Every 5 minutes</option>
+                  <option value="15min">Every 15 minutes</option>
+                  <option value="30min">Every 30 minutes</option>
+                  <option value="1hour">Every hour</option>
+                  <option value="4hours">Every 4 hours</option>
+                </select>
+              </div>
+
+              <div className="pt-4 border-t">
+                <p className="text-sm font-medium text-gray-700 mb-3">Alert Preferences</p>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={alertSettings.negativeReviews}
+                      onChange={(e) => setAlertSettings({...alertSettings, negativeReviews: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Negative Reviews (1-2 stars)</p>
+                      <p className="text-xs text-gray-600">Get instant alerts for low ratings</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={alertSettings.allReviews}
+                      onChange={(e) => setAlertSettings({...alertSettings, allReviews: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">All New Reviews</p>
+                      <p className="text-xs text-gray-600">Notify for every review</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <p className="text-sm font-medium text-gray-700 mb-3">Notification Channels</p>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={alertSettings.pushNotifications}
+                      onChange={(e) => setAlertSettings({...alertSettings, pushNotifications: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Bell size={16} className="text-gray-600" />
+                      <p className="text-sm font-medium text-gray-900">Push Notifications</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={alertSettings.emailAlerts}
+                      onChange={(e) => setAlertSettings({...alertSettings, emailAlerts: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Mail size={16} className="text-gray-600" />
+                      <p className="text-sm font-medium text-gray-900">Email Alerts</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={alertSettings.smsAlerts}
+                      onChange={(e) => setAlertSettings({...alertSettings, smsAlerts: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <div className="flex items-center gap-2">
+                      <MessageSquare size={16} className="text-gray-600" />
+                      <p className="text-sm font-medium text-gray-900">SMS Alerts</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-green-900 mb-2">Sync Status</h4>
+                <p className="text-sm text-green-800 mb-3">
+                  Last synced: {lastSyncTime.toLocaleTimeString()}
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { platform: 'Google', status: 'connected' },
+                    { platform: 'Yelp', status: 'connected' },
+                    { platform: 'Facebook', status: 'connected' },
+                    { platform: 'Trustpilot', status: 'connected' },
+                    { platform: 'TripAdvisor', status: 'connected' }
+                  ].map(({ platform, status }) => (
+                    <div key={platform} className="flex items-center justify-between text-sm">
+                      <span className="text-green-900">{platform}</span>
+                      <span className="text-green-600 flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        {status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-200 p-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-orange-600 flex-shrink-0" size={24} />
+              <div>
+                <h4 className="font-semibold text-orange-900 mb-2">Response Time Goal</h4>
+                <p className="text-sm text-orange-800">
+                  Respond to negative reviews within <strong>1 hour</strong> for best results. Current average: <strong>45 minutes</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCustomers = () => {
+    const filteredCustomers = getFilteredCustomers();
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">Customer Database</h1>
+          <div className="flex gap-3">
+            <label className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-medium transition flex items-center gap-2 cursor-pointer border shadow-sm">
+              <Upload size={20} />
+              Import CSV
+              <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
+            </label>
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
+              <Download size={20} />
+              Export
+            </button>
+          </div>
+        </div>
+
+        {showBulkSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+            <CheckCircle className="text-green-600" size={24} />
+            <div>
+              <p className="font-medium text-green-900">Success!</p>
+              <p className="text-sm text-green-700">
+                {selectedCustomers.length} review requests have been {scheduleTiming === 'immediate' ? 'sent' : 'scheduled'} via {deliveryMethod === 'both' ? 'Email & SMS' : deliveryMethod === 'sms' ? 'SMS' : 'Email'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+          <div className="p-6 border-b bg-gray-50">
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+              <div className="flex-1 w-full lg:w-auto">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Search customers by name, email, or phone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              
+              {selectedCustomers.length > 0 && (
+                <div className="flex gap-3 w-full lg:w-auto">
+                  <select
+                    value={deliveryMethod}
+                    onChange={(e) => setDeliveryMethod(e.target.value)}
+                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="email">📧 Email Only</option>
+                    <option value="sms">📱 SMS Only</option>
+                    <option value="both">📧📱 Email + SMS</option>
+                  </select>
+                  
+                  <select
+                    value={scheduleTiming}
+                    onChange={(e) => setScheduleTiming(e.target.value)}
+                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="immediate">Send Now</option>
+                    <option value="1hour">In 1 Hour</option>
+                    <option value="4hours">In 4 Hours</option>
+                    <option value="1day">Tomorrow</option>
+                    <option value="3days">In 3 Days</option>
+                  </select>
+                  
+                  <button
+                    onClick={handleBulkSendRequests}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2 shadow-sm whitespace-nowrap"
+                  >
+                    <Send size={20} />
+                    Send to {selectedCustomers.length}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-6 py-4 text-left">
+                    <input
+                      type="checkbox"
+                      checked={selectedCustomers.length === filteredCustomers.length && filteredCustomers.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Phone</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Added Date</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredCustomers.map(customer => (
+                  <tr key={customer.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedCustomers.includes(customer.id)}
+                        onChange={() => handleSelectCustomer(customer.id)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-gray-900">{customer.name}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-gray-600">{customer.email}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-gray-600">{customer.phone}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-gray-600">{customer.addedDate}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-block px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full font-medium">
+                        Active
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDeleteCustomer(customer.id)}
+                        className="text-red-600 hover:text-red-800 transition"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredCustomers.length === 0 && (
+            <div className="text-center py-12">
+              <Users className="mx-auto text-gray-300 mb-3" size={48} />
+              <p className="text-gray-500">No customers found</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {searchTerm ? 'Try a different search term' : 'Add your first customer below'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <h3 className="text-lg font-semibold mb-4">Add New Customer</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Customer Name *
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="John Doe"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="john@example.com"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="(555) 123-4567"
+              />
+            </div>
+          </div>
+          
+          <button
+            onClick={handleAddCustomer}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
+          >
+            Add Customer
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSettings = () => (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <h3 className="text-lg font-semibold mb-4">Business Information</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Business Name
+            </label>
+            <input
+              type="text"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="My Business"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <h3 className="text-lg font-semibold mb-4">Platform Connections</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Google Place ID
+            </label>
+            <input
+              type="text"
+              value={placeId}
+              onChange={(e) => setPlaceId(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4"
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              Find your Place ID at{' '}
+              <a 
+                href="https://developers.google.com/maps/documentation/places/web-service/place-id" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Google's Place ID Finder
+              </a>
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Yelp Business URL
+            </label>
+            <input
+              type="url"
+              value={yelpUrl}
+              onChange={(e) => setYelpUrl(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="https://www.yelp.com/biz/your-business"
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              Enter your complete Yelp business page URL
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Facebook Page URL
+            </label>
+            <input
+              type="url"
+              value={facebookUrl}
+              onChange={(e) => setFacebookUrl(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="https://www.facebook.com/yourbusiness"
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              Enter your Facebook business page URL
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Trustpilot Business URL
+            </label>
+            <input
+              type="url"
+              value={trustpilotUrl}
+              onChange={(e) => setTrustpilotUrl(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="https://www.trustpilot.com/review/yourbusiness.com"
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              Enter your Trustpilot business profile URL
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              TripAdvisor URL
+            </label>
+            <input
+              type="url"
+              value={tripadvisorUrl}
+              onChange={(e) => setTripadvisorUrl(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              placeholder="https://www.tripadvisor.com/your-business"
+            />
+            <p className="text-sm text-gray-600 mt-2">
+              Enter your TripAdvisor listing URL (for hospitality businesses)
+            </p>
+          </div>
+
+          <div className="pt-4 border-t">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Active Platforms
+            </label>
+            <div className="space-y-2">
+              {[
+                { id: 'google', name: 'Google', color: 'blue', enabled: !!placeId },
+                { id: 'yelp', name: 'Yelp', color: 'red', enabled: !!yelpUrl },
+                { id: 'facebook', name: 'Facebook', color: 'indigo', enabled: !!facebookUrl },
+                { id: 'trustpilot', name: 'Trustpilot', color: 'green', enabled: !!trustpilotUrl },
+                { id: 'tripadvisor', name: 'TripAdvisor', color: 'emerald', enabled: !!tripadvisorUrl }
+              ].map(platform => (
+                <div key={platform.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 bg-${platform.color}-100 rounded flex items-center justify-center`}>
+                      <span className={`text-${platform.color}-600 font-bold text-sm`}>{platform.name.charAt(0)}</span>
+                    </div>
+                    <span className="font-medium text-gray-900">{platform.name}</span>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    platform.enabled 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {platform.enabled ? 'Connected' : 'Not Connected'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <h3 className="text-lg font-semibold mb-4">Automated Monitoring</h3>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                autoSync ? 'bg-green-500' : 'bg-gray-400'
+              }`}>
+                {autoSync ? <RefreshCcw className="text-white animate-spin" size={20} /> : <BellOff className="text-white" size={20} />}
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Auto-Sync Reviews</p>
+                <p className="text-sm text-gray-600">
+                  {autoSync ? `Checking every ${syncFrequency === '5min' ? '5 minutes' : syncFrequency === '15min' ? '15 minutes' : syncFrequency === '30min' ? '30 minutes' : syncFrequency === '1hour' ? 'hour' : '4 hours'}` : 'Currently paused'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setAutoSync(!autoSync)}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                autoSync 
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {autoSync ? 'Pause' : 'Enable'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-gray-50 rounded-lg border">
+              <p className="text-sm text-gray-600 mb-1">Reviews Today</p>
+              <p className="text-2xl font-bold text-gray-900">3</p>
+              <p className="text-xs text-green-600 mt-1">↑ 50% from yesterday</p>
+            </div>
+            
+            <div className="p-4 bg-gray-50 rounded-lg border">
+              <p className="text-sm text-gray-600 mb-1">Avg Response Time</p>
+              <p className="text-2xl font-bold text-gray-900">45m</p>
+              <p className="text-xs text-green-600 mt-1">15m faster than goal</p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Sync Frequency
+            </label>
+            <select
+              value={syncFrequency}
+              onChange={(e) => setSyncFrequency(e.target.value)}
+              disabled={!autoSync}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="5min">Every 5 minutes (Recommended for high-volume)</option>
+              <option value="15min">Every 15 minutes (Standard)</option>
+              <option value="30min">Every 30 minutes</option>
+              <option value="1hour">Every hour</option>
+              <option value="4hours">Every 4 hours</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <h3 className="text-lg font-semibold mb-4">Alert Settings</h3>
+        
+        <div className="space-y-6">
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-3">When to Alert Me</p>
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer border">
+                <input
+                  type="checkbox"
+                  checked={alertSettings.negativeReviews}
+                  onChange={(e) => setAlertSettings({...alertSettings, negativeReviews: e.target.checked})}
+                  className="w-5 h-5 text-red-600 rounded focus:ring-red-500 mt-0.5"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">⚠️ Negative Reviews (1-2 stars)</p>
+                  <p className="text-xs text-gray-600 mt-1">Get instant alerts for reviews that need immediate attention</p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer border">
+                <input
+                  type="checkbox"
+                  checked={alertSettings.allReviews}
+                  onChange={(e) => setAlertSettings({...alertSettings, allReviews: e.target.checked})}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 mt-0.5"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">📝 All New Reviews</p>
+                  <p className="text-xs text-gray-600 mt-1">Notify me every time any review is posted</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-3">How to Notify Me</p>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer border">
+                <input
+                  type="checkbox"
+                  checked={alertSettings.pushNotifications}
+                  onChange={(e) => setAlertSettings({...alertSettings, pushNotifications: e.target.checked})}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <Bell size={18} className="text-gray-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Push Notifications</p>
+                  <p className="text-xs text-gray-600">In-app notifications</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer border">
+                <input
+                  type="checkbox"
+                  checked={alertSettings.emailAlerts}
+                  onChange={(e) => setAlertSettings({...alertSettings, emailAlerts: e.target.checked})}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <Mail size={18} className="text-gray-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Email Alerts</p>
+                  <p className="text-xs text-gray-600">Sent to your business email</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer border">
+                <input
+                  type="checkbox"
+                  checked={alertSettings.smsAlerts}
+                  onChange={(e) => setAlertSettings({...alertSettings, smsAlerts: e.target.checked})}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <MessageSquare size={18} className="text-gray-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">SMS Alerts (Premium)</p>
+                  <p className="text-xs text-gray-600">Text messages for urgent reviews</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <h3 className="text-lg font-semibold mb-4">Review Request Settings</h3>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Delivery Method
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div 
+                onClick={() => setDeliveryMethod('email')}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition ${
+                  deliveryMethod === 'email' 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Mail size={20} className={deliveryMethod === 'email' ? 'text-blue-600' : 'text-gray-600'} />
+                  <span className="font-medium">Email Only</span>
+                </div>
+                <p className="text-xs text-gray-600">~20% open rate, professional</p>
+              </div>
+              
+              <div 
+                onClick={() => setDeliveryMethod('sms')}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition ${
+                  deliveryMethod === 'sms' 
+                    ? 'border-green-500 bg-green-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <MessageSquare size={20} className={deliveryMethod === 'sms' ? 'text-green-600' : 'text-gray-600'} />
+                  <span className="font-medium">SMS Only</span>
+                </div>
+                <p className="text-xs text-gray-600">~98% open rate, instant</p>
+              </div>
+              
+              <div 
+                onClick={() => setDeliveryMethod('both')}
+                className={`p-4 border-2 rounded-lg cursor-pointer transition ${
+                  deliveryMethod === 'both' 
+                    ? 'border-purple-500 bg-purple-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Send size={20} className={deliveryMethod === 'both' ? 'text-purple-600' : 'text-gray-600'} />
+                  <span className="font-medium">Email + SMS</span>
+                </div>
+                <p className="text-xs text-gray-600">Maximum reach & impact</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              SMS Message Template
+            </label>
+            <textarea
+              value={smsMessage}
+              onChange={(e) => setSmsMessage(e.target.value)}
+              rows="4"
+              maxLength="160"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
+              placeholder="Hi {name}! Thanks for choosing {business}..."
+            />
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-gray-600">
+                Use {'{name}'}, {'{business}'}, {'{link}'} as placeholders
+              </p>
+              <span className={`text-xs font-medium ${smsMessage.length > 140 ? 'text-red-600' : 'text-gray-600'}`}>
+                {smsMessage.length}/160 characters
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email Subject Line
+            </label>
+            <input
+              type="text"
+              value={emailSubject}
+              onChange={(e) => setEmailSubject(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="We'd love your feedback!"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Default Send Timing
+            </label>
+            <select
+              value={scheduleTiming}
+              onChange={(e) => setScheduleTiming(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="immediate">Send Immediately</option>
+              <option value="1hour">1 Hour After Purchase</option>
+              <option value="4hours">4 Hours After Purchase</option>
+              <option value="1day">1 Day After Purchase</option>
+              <option value="3days">3 Days After Purchase</option>
+              <option value="7days">1 Week After Purchase</option>
+            </select>
+            <p className="text-xs text-gray-600 mt-2">
+              💡 Best practice: Send 24-48 hours after service for optimal response rates
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200 p-4">
+            <div className="flex items-start gap-3">
+              <TrendingUp className="text-blue-600 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm font-semibold text-gray-900 mb-1">SMS vs Email Performance</p>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  <li>• SMS: 98% open rate, 45% click rate, 5x faster response</li>
+                  <li>• Email: 20% open rate, 3% click rate, more detailed content</li>
+                  <li>• Both: Best results - reach customers on all channels</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-yellow-600 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm font-semibold text-yellow-900 mb-1">SMS Pricing Note</p>
+                <p className="text-sm text-yellow-800">
+                  SMS messages cost approximately $0.01-$0.03 per message. In production, you'll need a Twilio or similar SMS service account.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-6">
+        <div className="flex gap-3">
+          <Clock className="text-yellow-600 flex-shrink-0" size={24} />
+          <div>
+            <p className="text-sm font-semibold text-yellow-900">Demo Mode Active</p>
+            <p className="text-sm text-yellow-800 mt-1">
+              This is a prototype. In production, AI responses would use advanced NLP models (GPT-4, Claude, etc.) and integrate with actual review platforms.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={() => alert('Settings saved successfully! (Demo mode)')}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition shadow-sm"
+      >
+        Save All Settings
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg">
+                <Star className="text-white" size={24} />
+              </div>
+              <div>
+                <span className="text-xl font-bold text-gray-900">ReviewBoost</span>
+                <p className="text-xs text-gray-500">Pro Plan</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button 
+                  onClick={() => setActiveTab('notifications')}
+                  className="relative p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <Bell className="text-gray-600" size={24} />
+                  {notifications.filter(n => !n.read).length > 0 && (
+                    <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {notifications.filter(n => !n.read).length}
+                    </span>
+                  )}
+                </button>
+              </div>
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium text-gray-900">{businessName}</p>
+                <p className="text-xs text-gray-500">{customers.length} customers</p>
+              </div>
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                {businessName.charAt(0)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-3 mb-8 overflow-x-auto pb-2">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'dashboard'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <BarChart3 size={20} />
+            Dashboard
+          </button>
+
+          <button
+            onClick={() => setActiveTab('ai-responses')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'ai-responses'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <Sparkles size={20} />
+            Response Board
+            {reviews.filter(r => !r.responded).length > 0 && (
+              <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                {reviews.filter(r => !r.responded).length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('sentiment')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'sentiment'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <TrendingUp size={20} />
+            Sentiment Analysis
+          </button>
+
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'notifications'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <Bell size={20} />
+            Notifications
+            {notifications.filter(n => !n.read).length > 0 && (
+              <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                {notifications.filter(n => !n.read).length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('templates')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'templates'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <FileText size={20} />
+            Templates
+            <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+              {templates.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('qrcodes')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'qrcodes'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <QrCode size={20} />
+            QR Codes
+            <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+              {qrCodes.length}
+            </span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('customers')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'customers'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <Users size={20} />
+            Customers
+            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+              {customers.length}
+            </span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition whitespace-nowrap ${
+              activeTab === 'settings'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+            }`}
+          >
+            <Settings size={20} />
+            Settings
+          </button>
+        </div>
+
+        {activeTab === 'dashboard' && renderDashboard()}
+        {activeTab === 'ai-responses' && renderAIResponses()}
+        {activeTab === 'sentiment' && renderSentimentAnalysis()}
+        {activeTab === 'notifications' && renderNotifications()}
+        {activeTab === 'templates' && renderTemplates()}
+        {activeTab === 'qrcodes' && renderQRCodes()}
+        {activeTab === 'customers' && renderCustomers()}
+        {activeTab === 'settings' && renderSettings()}
+      </div>
+
+      <footer className="bg-white border-t mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-600">
+              © 2025 ReviewBoost. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm text-gray-600">
+              <a href="#" className="hover:text-blue-600 transition">Help Center</a>
+              <a href="#" className="hover:text-blue-600 transition">Documentation</a>
+              <a href="#" className="hover:text-blue-600 transition">Contact Support</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -1,0 +1,53 @@
+{
+  "name": "reviewboost",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "tsx watch server/index.ts",
+    "client": "vite",
+    "build": "vite build && esbuild server/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --external:pg-native --external:fsevents",
+    "start": "node dist/index.js",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@neondatabase/serverless": "^0.10.4",
+    "connect-pg-simple": "^10.0.0",
+    "drizzle-orm": "^0.39.3",
+    "drizzle-zod": "^0.8.3",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "lucide-react": "^0.469.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "qrcode": "^1.5.4",
+    "resend": "^4.1.2",
+    "wouter": "^3.5.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.65.1",
+    "@types/connect-pg-simple": "^7.0.3",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/node": "^22.13.5",
+    "@types/passport": "^1.0.17",
+    "@types/passport-local": "^1.0.38",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "drizzle-kit": "^0.30.4",
+    "esbuild": "^0.25.1",
+    "postcss": "^8.5.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  }
+}
